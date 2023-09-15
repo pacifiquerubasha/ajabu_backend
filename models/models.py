@@ -23,28 +23,31 @@ class User(Base):
     is_verified = Column(String, default=False)
     verification_code = Column(String, nullable=True)
 
+    post = relationship("Post", back_populates="user")
+    comment = relationship("Comment", back_populates="user")
 
-# class Post(Base):
-#     __tablename__ = 'posts'
-#     id = Column(Integer, primary_key=True, index=True)
-#     title = Column(String)
-#     body = Column(String)
-#     image = Column(String)
-#     user_id = Column(Integer, ForeignKey('users.id'))
+
+class Post(Base):
+    __tablename__ = 'posts'
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    body = Column(String)
+    image = Column(String, nullable=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
     
-#     users = relationship("User", back_populates="posts")
-#     comments = relationship("Comment", back_populates="posts")
+    user = relationship("User", back_populates="post")
+    comment = relationship("Comment", back_populates="post")
 
 
-# class Comment(Base):
-#     __tablename__ = 'comments'
-#     id = Column(Integer, primary_key=True, index=True)
-#     body = Column(String)
-#     user_id = Column(Integer, ForeignKey('users.id'))
-#     post_id = Column(Integer, ForeignKey('posts.id'))
+class Comment(Base):
+    __tablename__ = 'comments'
+    id = Column(Integer, primary_key=True, index=True)
+    body = Column(String)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    post_id = Column(Integer, ForeignKey('posts.id'))
 
-#     users = relationship("User", back_populates="comments")
-#     posts = relationship("Post", back_populates="comments")
+    user = relationship("User", back_populates="comment")
+    post = relationship("Post", back_populates="comment")
 
 
 # class Friend(Base):
