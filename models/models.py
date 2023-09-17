@@ -11,6 +11,19 @@ class FriendShipStatus(Enum):
     REJECTED = 3
     BLOCKED = 4
 
+class Friend(Base):
+    __tablename__ = 'friends'
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    friend_id = Column(Integer, ForeignKey('users.id'))
+    status = Column(Integer, default=1)
+    created_at = Column(DateTime, default=func.current_timestamp())
+    updated_at = Column(DateTime, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    user = relationship("User", back_populates="friends", foreign_keys=[user_id])
+    friend = relationship("User", back_populates="friends", foreign_keys=[friend_id])
+
+
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, index=True)
@@ -25,7 +38,7 @@ class User(Base):
 
     post = relationship("Post", back_populates="user")
     comment = relationship("Comment", back_populates="user")
-
+    friends = relationship("Friend", back_populates="user", foreign_keys=[Friend.user_id])
 
 class Post(Base):
     __tablename__ = 'posts'
@@ -50,15 +63,6 @@ class Comment(Base):
     post = relationship("Post", back_populates="comment")
 
 
-# class Friend(Base):
-#     __tablename__ = 'friends'
-#     id = Column(Integer, primary_key=True, index=True)
-#     user_id = Column(Integer, ForeignKey('users.id'))
-#     friend_id = Column(Integer, ForeignKey('users.id'))
-#     status = Column(Integer, default=FriendShipStatus.PENDING)
-
-#     users = relationship("User", back_populates="friends", foreign_keys=[user_id])
-#     friends = relationship("User", back_populates="friends", foreign_keys=[friend_id])
 
 # class FriendRequest(Base):
 #     __tablename__ = 'friend_requests'
