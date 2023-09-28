@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from lib import database
+from lib import database, oauth2
 from models import schemas, models
 from sqlalchemy.orm import Session
+
 
 from typing import List
 
@@ -29,7 +30,7 @@ router = APIRouter(
 get_db = database.get_db
 
 @router.post("/", response_model=schemas.PostSchema)
-def create_post(request:schemas.PostSchema, db: Session = Depends(get_db)):
+def create_post(request:schemas.PostSchema, db: Session = Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
     
     #Check if user exists
     user = db.query(models.User).filter(models.User.id == request.user_id).first()

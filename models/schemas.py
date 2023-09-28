@@ -110,3 +110,18 @@ class FriendShipStatusChangeSchema(BaseModel):
 
     class Config():
         orm_mode = True
+
+#LOGIN
+class Login(BaseModel):
+    username: str
+    password: str
+
+
+#TOKEN
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
