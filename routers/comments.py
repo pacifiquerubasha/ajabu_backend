@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from lib import database
+from lib import database, oauth2
 from models import schemas, models
 from sqlalchemy.orm import Session
 
@@ -12,7 +12,7 @@ router = APIRouter(
 get_db = database.get_db
 
 @router.post("/", response_model=schemas.CommentSchema)
-def create_comment(request:schemas.CommentSchema, db:Session=Depends(get_db)):
+def create_comment(request:schemas.CommentSchema, db:Session=Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
         
         #Check if user exists
         user = db.query(models.User).filter(models.User.id == request.user_id).first()
@@ -33,7 +33,7 @@ def create_comment(request:schemas.CommentSchema, db:Session=Depends(get_db)):
 
 
 @router.get("/{post_id}", response_model=List[schemas.CommentResponseSchema])
-def get_comments(post_id:int, db:Session=Depends(get_db)):
+def get_comments(post_id:int, db:Session=Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
     comments = db.query(models.Comment).filter(models.Comment.post_id == post_id).all()
     
     return comments

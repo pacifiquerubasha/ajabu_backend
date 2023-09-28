@@ -4,6 +4,13 @@ from models import schemas, models
 from lib import database, hashing
 from typing import List
 
+from fastapi_mail import FastMail, MessageSchema,ConnectionConfig
+from pydantic import EmailStr, BaseModel
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 router = APIRouter(
     prefix="/api/v1/users",
     tags=["users"]
@@ -12,8 +19,51 @@ router = APIRouter(
 get_db = database.get_db
 Hash = hashing.Hash
 
-@router.post("/", response_model=schemas.UserResponseSchema)
-def createUser(request: schemas.UserSchema, db: Session = Depends(get_db)):
+conf = ConnectionConfig(
+   MAIL_SERVER=str(os.getenv("EMAIL_HOST")),
+   MAIL_PORT=int(os.getenv("EMAIL_PORT")),
+   MAIL_USERNAME=str(os.getenv("EMAIL_USERNAME")),
+   MAIL_PASSWORD=str(os.getenv("EMAIL_PASSWORD")),
+   MAIL_FROM = "test@ajabu.com",
+   MAIL_STARTTLS = False,
+   MAIL_SSL_TLS = False,
+   USE_CREDENTIALS = True,
+   VALIDATE_CERTS = True
+)
+
+async def send_mail(email: schemas.EmailSchema):
+ 
+    template = """
+        <html>
+        <body>
+         
+ 
+<p>Hi !!!
+        <br>Thanks for using fastapi mail, keep using it..!!!</p>
+ 
+ 
+        </body>
+        </html>
+        """
+ 
+    message = MessageSchema(
+        subject="Fastapi-Mail module",
+        recipients=email.dict().get("email"),  # List of recipients, as many as you can pass
+        body=template,
+        subtype="html"
+        )
+ 
+    fm = FastMail(conf)
+    await fm.send_message(message)
+    print(message)
+ 
+     
+ 
+    return {"message": "email has been sent"}
+
+# @router.post("/", response_model=schemas.UserResponseSchema)
+@router.post("/")
+async def createUser(request: schemas.UserSchema, db: Session = Depends(get_db)):
 
     #Check if user exists
     user = db.query(models.User).filter_by(username = request.username).first()
@@ -31,6 +81,10 @@ def createUser(request: schemas.UserSchema, db: Session = Depends(get_db)):
     db.add(newuser)
     db.commit()
     db.refresh(newuser)
+
+    #Send email
+    email = schemas.EmailSchema(email=[request.email])
+    await send_mail(email)
     
     return newuser
 

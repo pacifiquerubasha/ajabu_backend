@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from fastapi import UploadFile
 from datetime import datetime
 from enum import Enum
@@ -125,3 +125,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+class EmailSchema(BaseModel):
+   email: List[EmailStr]

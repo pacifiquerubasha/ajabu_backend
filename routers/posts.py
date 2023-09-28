@@ -26,7 +26,6 @@ router = APIRouter(
     tags=["posts"]
 )
 
-
 get_db = database.get_db
 
 @router.post("/", response_model=schemas.PostSchema)
@@ -45,13 +44,13 @@ def create_post(request:schemas.PostSchema, db: Session = Depends(get_db), curre
     return new_post
 
 @router.get("/", response_model=List[schemas.PostResponseSchema])
-def get_all_posts(db: Session = Depends(get_db)):
+def get_all_posts(db: Session = Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
     posts = db.query(models.Post).all()
     
     return posts
 
 @router.get("/{id}", response_model=schemas.PostResponseSchema)
-def get_post(id:int, db: Session = Depends(get_db)):
+def get_post(id:int, db: Session = Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
@@ -60,7 +59,7 @@ def get_post(id:int, db: Session = Depends(get_db)):
 
 
 @router.get("/search/{user_id}", response_model= List[schemas.PostResponseSchema])
-def get_user_posts(user_id:int, db:Session = Depends(get_db)):
+def get_user_posts(user_id:int, db:Session = Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
     posts = db.query(models.Post).filter_by(user_id=user_id).all()
     
     return posts

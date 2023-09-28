@@ -23,6 +23,10 @@ def login(request: OAuth2PasswordRequestForm=Depends(), db: Session = Depends(ge
     if not Hash.verify(request.password, user.password):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect username or password")
     
+    #Check that user.is_verified
+    if user.is_verified == "0":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is not verified. Please check your email")
+
     access_token = token.create_access_token(data={"sub": user.username})
     
     return {"access_token": access_token, "token_type": "bearer", "user": user}
