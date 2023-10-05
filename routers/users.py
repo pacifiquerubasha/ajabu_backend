@@ -31,6 +31,8 @@ conf = ConnectionConfig(
    VALIDATE_CERTS = True
 )
 
+
+
 async def send_mail(email: schemas.EmailSchema):
  
     template = """
